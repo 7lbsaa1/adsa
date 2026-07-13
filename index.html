@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAUS — Architectural Studio</title>
+  <meta name="description" content="HAUS is a Zurich-based architectural studio. We design spaces that endure.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23F7F6F3'/><text x='5' y='24' font-family='Helvetica Neue,Arial' font-size='22' font-weight='700' fill='%231C1C1C' letter-spacing='-2'>H</text></svg>">
+  <style>
+    /* ============================================
+       DESIGN TOKENS
+    ============================================ */
+    :root {
+      --c-bg: #F7F6F3;
+      --c-surface: #E8E6E1;
+      --c-text: #1C1C1C;
+      --c-text-secondary: #6B6B6B;
+      --c-accent: #B8976A;
+      --c-accent-deep: #7A5C3A;
+      --c-divider: #D4D2CC;
+      --c-inverted: #141414;
+
+      --f-primary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --f-body: 'Inter', -apple-system, sans-serif;
+      --f-mono: 'JetBrains Mono', monospace;
+
+      --space-1: 8px;
+      --space-2: 16px;
+      --space-3: 24px;
+      --space-4: 32px;
+      --space-5: 48px;
+      --space-6: 64px;
+      --space-7: 80px;
+      --space-8: 96px;
+      --space-9: 128px;
+      --space-10: 160px;
+
+      --grid-cols: 12;
+      --grid-gutter: 24px;
+      --grid-padding: 80px;
+      --max-width: 1440px;
+
+      --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+      --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+      --header-h: 72px;
+    }
+
+    @media (max-width: 1199px) {
+      :root {
+        --grid-padding: 48px;
+      }
+    }
+    @media (max-width: 767px) {
+      :root {
+        --grid-padding: 24px;
+        --grid-gutter: 16px;
+      }
+    }
+
+    /* ============================================
+       RESET & BASE
+    ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--f-body);
+      background: var(--c-bg);
+      color: var(--c-text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background: var(--c-accent);
+      color: #fff;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--c-surface);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--c-text);
+      border-radius: 0;
+    }
+
+    img, video {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    /* ============================================
+       TYPOGRAPHY
+    ============================================ */
+    .t-display {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    .t-heading {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .t-label {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-text-secondary);
+    }
+
+    .t-body {
+      font-family: var(--f-body);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--c-text-secondary);
+    }
+
+    /* ============================================
+       LAYOUT
+    ============================================ */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--grid-padding);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--grid-gutter);
+    }
+
+    .section {
+      padding: var(--space-10) 0;
+      position: relative;
+    }
+
+    @media (max-width: 767px) {
+      .section {
+        padding: var(--space-7) 0;
+      }
+    }
+
+    /* ============================================
+       HEADER
+    ============================================ */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-h);
+      z-index: 1000;
+      transition: background 400ms var(--ease-out), backdrop-filter 400ms var(--ease-out);
+    }
+
+    .header.scrolled {
+      background: rgba(247, 246, 243, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--c-divider);
+    }
+
+    .header__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .header__logo {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-text);
+    }
+
+    .header__nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
+    }
+
+    .header__nav-link {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--c-text);
+      position: relative;
+      padding-bottom: 2px;
+    }
+
+    .header__nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--c-accent);
+      transition: width 250ms var(--ease-out);
+    }
+
+    .header__nav-link:hover::after,
+    .header__nav-link.active::after {
+      width: 100%;
+    }
+
+    .header__hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      width: 24px;
+      cursor: pointer;
+    }
+
+    .header__hamburger span {
+      display: block;
+      height: 1px;
+      background: var(--c-text);
+      transition: all 300ms var(--ease-out);
+    }
+
+    .header__hamburger.open span:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+    }
+    .header__hamburger.open span:nth-child(2) {
+      opacity: 0;
+    }
+    .header__hamburger.open span:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    @media (max-width: 767px) {
+      .header__nav {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--c-bg);
+        flex-direction: column;
+        justify-content: center;
+        gap: var(--space-5);
+        z-index: 999;
+      }
+
+      .header__nav.open {
+        display: flex;
+      }
+
+      .header__nav-link {
+        font-size: 32px;
+        font-family: var(--f-primary);
+        letter-spacing: -0.02em;
+        text-transform: none;
+      }
+
+      .header__hamburger {
+        display: flex;
+        position: relative;
+        z-index: 1001;
+      }
+    }
+
+    /* ============================================
+       HERO
+    ============================================ */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 600px;
+      overflow: hidden;
+      background: var(--c-inverted);
+    }
+
+    .hero__track {
+      display: flex;
+      height: 100%;
+      transition: transform 800ms var(--ease-out);
+      will-change: transform;
+    }
+
+    .hero__slide {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background: var(--c-inverted);
+    }
+
+    .hero__slide-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.6;
+      transform: scale(1.05);
+      animation: heroZoom 12s var(--ease-out) forwards;
+    }
+
+    @keyframes heroZoom {
+      to { transform: scale(1.0); opacity: 0.6; }
+    }
+
+    .hero__slide-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(20, 20, 20, 0.85) 0%,
+        rgba(20, 20, 20, 0.2) 50%,
+        rgba(20, 20, 20, 0.0) 100%
+      );
+    }
+
+    .hero__slide-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: var(--space-7) var(--grid-padding);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .hero__slide-title {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(40px, 6vw, 96px);
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      color: #fff;
+      max-width: 700px;
+    }
+
+    .hero__slide-meta {
+      text-align: right;
+    }
+
+    .hero__slide-meta .t-label {
+      color: rgba(255,255,255,0.6);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .hero__slide-meta-name {
+      font-family: var(--f-primary);
+      font-weight: 500;
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 0.04em;
+    }
+
+    /* Hero intro text */
+    .hero__intro {
+      position: absolute;
+      top: 50%;
+      left: var(--grid-padding);
+      transform: translateY(-50%);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero__intro-label {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: var(--space-2);
+    }
+
+    .hero__intro-title {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(80px, 14vw, 200px);
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      color: rgba(255,255,255,0.08);
+      user-select: none;
+    }
+
+    /* Progress bar */
+    .hero__progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      z-index: 20;
+    }
+
+    .hero__progress-fill {
+      height: 100%;
+      background: var(--c-accent);
+      width: 20%;
+      transition: width 800ms var(--ease-out);
+    }
+
+    /* Slide indicators */
+    .hero__indicators {
+      position: absolute;
+      right: var(--grid-padding);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      z-index: 20;
+    }
+
+    .hero__indicator {
+      width: 24px;
+      height: 1px;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 300ms var(--ease-out);
+      position: relative;
+    }
+
+    .hero__indicator::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: var(--c-accent);
+      transition: width 400ms var(--ease-out);
+    }
+
+    .hero__indicator.active::after {
+      width: 100%;
+    }
+
+    .hero__indicator.active {
+      background: rgba(255,255,255,0.6);
+    }
+
+    /* Hero bottom info */
+    .hero__bottom {
+      position: absolute;
+      bottom: var(--space-5);
+      left: var(--grid-padding);
+      right: var(--grid-padding);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 20;
+    }
+
+    .hero__year {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .hero__scroll-hint {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .hero__scroll-hint-line {
+      width: 40px;
+      height: 1px;
+      background: rgba(255,255,255,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero__scroll-hint-line::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--c-accent);
+      animation: scrollLine 2s var(--ease-in-out) infinite;
+    }
+
+    @keyframes scrollLine {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(0); }
+      100% { transform: translateX(100%); }
+    }
+
+    @media (max-width: 767px) {
+      .hero__intro-title {
+        display: none;
+      }
+      .hero__indicators {
+        right: var(--grid-padding);
+      }
+      .hero__slide-content {
+        padding: var(--space-5) var(--grid-padding);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+      }
+      .hero__slide-meta {
+        text-align: left;
+      }
+    }
+
+    /* ============================================
+       SCROLL REVEAL
+    ============================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-img {
+      opacity: 0;
+      transform: scale(1.05);
+      transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+    }
+
+    .reveal-img.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-img {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .hero__slide-bg {
+        animation: none;
+        transform: scale(1);
+      }
+    }
+
+    /* ============================================
+       MANIFESTO
+    ============================================ */
+    .manifesto {
+      padding: var(--space-10) 0;
+      border-bottom: 1px solid var(--c-divider);
+      overflow: hidden;
+    }
+
+    .manifesto__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--grid-padding);
+    }
+
+    .manifesto__label {
+      margin-bottom: var(--space-5);
+    }
+
+    .manifesto__text {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(36px, 5.5vw, 80px);
+      letter-spacing: -0.035em;
+      line-height: 1.08;
+      color: var(--c-text);
+      max-width: 1100px;
+    }
+
+    .manifesto__text em {
+      font-style: normal;
+      color: var(--c-accent);
+    }
+
+    .manifesto__sub {
+      margin-top: var(--space-5);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--grid-gutter);
+      border-top: 1px solid var(--c-divider);
+      padding-top: var(--space-4);
+    }
+
+    .manifesto__sub-text {
+      font-size: 15px;
+      color: var(--c-text-secondary);
+      line-height: 1.7;
+      max-width: 520px;
+    }
+
+    .manifesto__accent-line {
+      width: 48px;
+      height: 2px;
+      background: var(--c-accent);
+      margin-bottom: var(--space-3);
+    }
+
+    @media (max-width: 767px) {
+      .manifesto__sub {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ============================================
+       SELECTED WORKS
+    ============================================ */
+    .works {
+      padding: var(--space-10) 0;
+    }
+
+    .works__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: var(--space-7);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--c-divider);
+    }
+
+    .works__title {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 56px);
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+    }
+
+    .works__count {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-text-secondary);
+    }
+
+    .works__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--grid-gutter);
+    }
+
+    .works__grid .works__item:nth-child(3) {
+      grid-column: 1 / -1;
+    }
+
+    .works__item {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--c-surface);
+    }
+
+    .works__item-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 600ms var(--ease-out);
+      aspect-ratio: 4/3;
+    }
+
+    .works__item:nth-child(3) .works__item-img {
+      aspect-ratio: 21/9;
+    }
+
+    .works__item:hover .works__item-img {
+      transform: scale(1.04);
+    }
+
+    .works__item-border {
+      position: absolute;
+      inset: 0;
+      border: 1px solid transparent;
+      transition: border-color 300ms var(--ease-out);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .works__item:hover .works__item-border {
+      border-color: var(--c-accent);
+    }
+
+    .works__item-info {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(20,20,20,0.85) 0%, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--space-4);
+      opacity: 0;
+      transition: opacity 350ms var(--ease-out);
+    }
+
+    .works__item:hover .works__item-info {
+      opacity: 1;
+    }
+
+    .works__item-name {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .works__item-cat {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-accent);
+    }
+
+    .works__item-num {
+      position: absolute;
+      top: var(--space-3);
+      right: var(--space-3);
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.5);
+      z-index: 3;
+    }
+
+    @media (max-width: 767px) {
+      .works__grid {
+        grid-template-columns: 1fr;
+      }
+      .works__grid .works__item:nth-child(3) {
+        grid-column: 1;
+      }
+      .works__item-info {
+        opacity: 1;
+      }
+      .works__item-img {
+        aspect-ratio: 16/9 !important;
+      }
+    }
+
+    /* ============================================
+       STATS STRIP
+    ============================================ */
+    .stats {
+      background: var(--c-inverted);
+      padding: var(--space-8) 0;
+      overflow: hidden;
+    }
+
+    .stats__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--grid-padding);
+    }
+
+    .stats__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .stats__item {
+      background: var(--c-inverted);
+      padding: var(--space-5) var(--space-4);
+      position: relative;
+    }
+
+    .stats__item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: var(--space-5);
+      bottom: var(--space-5);
+      width: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .stats__item:first-child::before {
+      display: none;
+    }
+
+    .stats__number {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(48px, 6vw, 80px);
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      color: #fff;
+      margin-bottom: var(--space-1);
+    }
+
+    .stats__label {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+
+    @media (max-width: 767px) {
+      .stats__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stats__item::before {
+        display: none;
+      }
+      .stats__item {
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .stats__grid .stats__item:nth-child(3)::before,
+      .stats__grid .stats__item:nth-child(4)::before {
+        display: block;
+      }
+    }
+
+    /* ============================================
+       PHILOSOPHY
+    ============================================ */
+    .philosophy {
+      padding: var(--space-10) 0;
+      border-bottom: 1px solid var(--c-divider);
+    }
+
+    .philosophy__label {
+      margin-bottom: var(--space-5);
+    }
+
+    .philosophy__heading {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 56px);
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      max-width: 800px;
+      margin-bottom: var(--space-7);
+    }
+
+    .philosophy__cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-7);
+      border-top: 1px solid var(--c-divider);
+      padding-top: var(--space-5);
+    }
+
+    .philosophy__col-num {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--c-accent);
+      margin-bottom: var(--space-3);
+    }
+
+    .philosophy__col-title {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-2);
+    }
+
+    .philosophy__col-text {
+      font-size: 14px;
+      color: var(--c-text-secondary);
+      line-height: 1.75;
+    }
+
+    @media (max-width: 767px) {
+      .philosophy__cols {
+        grid-template-columns: 1fr;
+        gap: var(--space-5);
+      }
+    }
+
+    /* ============================================
+       TEAM
+    ============================================ */
+    .team {
+      padding: var(--space-10) 0;
+      background: var(--c-surface);
+    }
+
+    .team__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: var(--space-7);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--c-divider);
+    }
+
+    .team__title {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(28px, 4vw, 56px);
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+    }
+
+    .team__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--grid-gutter);
+    }
+
+    .team__member {
+      position: relative;
+    }
+
+    .team__member-img-wrap {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      margin-bottom: var(--space-3);
+      background: var(--c-divider);
+    }
+
+    .team__member-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 500ms var(--ease-out);
+      filter: grayscale(30%);
+    }
+
+    .team__member:hover .team__member-img {
+      transform: scale(1.03);
+      filter: grayscale(0%);
+    }
+
+    .team__member-role {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-accent);
+      margin-bottom: 4px;
+    }
+
+    .team__member-name {
+      font-family: var(--f-primary);
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }
+
+    @media (max-width: 1023px) {
+      .team__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 767px) {
+      .team__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+      }
+    }
+
+    /* ============================================
+       AWARDS STRIP
+    ============================================ */
+    .awards {
+      padding: var(--space-6) 0;
+      border-top: 1px solid var(--c-divider);
+      border-bottom: 1px solid var(--c-divider);
+      overflow: hidden;
+    }
+
+    .awards__track {
+      display: flex;
+      gap: var(--space-7);
+      animation: marquee 30s linear infinite;
+    }
+
+    .awards__track:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .awards__item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .awards__dot {
+      width: 4px;
+      height: 4px;
+      background: var(--c-accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .awards__text {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-text-secondary);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .awards__track {
+        animation: none;
+      }
+    }
+
+    /* ============================================
+       CONTACT
+    ============================================ */
+    .contact {
+      padding: var(--space-10) 0;
+    }
+
+    .contact__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-9);
+      border-top: 1px solid var(--c-divider);
+      padding-top: var(--space-7);
+    }
+
+    .contact__left {
+      max-width: 480px;
+    }
+
+    .contact__heading {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: clamp(36px, 5vw, 72px);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: var(--space-4);
+    }
+
+    .contact__heading em {
+      font-style: normal;
+      color: var(--c-accent);
+    }
+
+    .contact__desc {
+      font-size: 15px;
+      color: var(--c-text-secondary);
+      line-height: 1.75;
+      margin-bottom: var(--space-5);
+    }
+
+    .contact__info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .contact__info-item {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-3);
+    }
+
+    .contact__info-label {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-text-secondary);
+      min-width: 80px;
+    }
+
+    .contact__info-value {
+      font-size: 14px;
+      color: var(--c-text);
+    }
+
+    /* Form */
+    .contact__form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .form__group {
+      position: relative;
+    }
+
+    .form__label {
+      display: block;
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-text-secondary);
+      margin-bottom: var(--space-1);
+    }
+
+    .form__input,
+    .form__select,
+    .form__textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--c-divider);
+      padding: var(--space-2) 0;
+      font-family: var(--f-body);
+      font-size: 15px;
+      color: var(--c-text);
+      outline: none;
+      transition: border-color 250ms var(--ease-out);
+      border-radius: 0;
+      -webkit-appearance: none;
+    }
+
+    .form__input:focus,
+    .form__select:focus,
+    .form__textarea:focus {
+      border-bottom-color: var(--c-text);
+    }
+
+    .form__input.error,
+    .form__select.error,
+    .form__textarea.error {
+      border-bottom-color: #c0392b;
+    }
+
+    .form__select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0 center;
+      padding-right: var(--space-3);
+    }
+
+    .form__textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form__error {
+      font-size: 11px;
+      color: #c0392b;
+      margin-top: 4px;
+      font-family: var(--f-mono);
+      letter-spacing: 0.04em;
+    }
+
+    .form__submit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      background: var(--c-accent);
+      color: #fff;
+      font-family: var(--f-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: var(--space-3) var(--space-5);
+      cursor: pointer;
+      border: none;
+      transition: background 250ms var(--ease-out), transform 200ms var(--ease-out);
+      min-width: 160px;
+    }
+
+    .form__submit:hover {
+      background: var(--c-accent-deep);
+      transform: translateY(-2px);
+    }
+
+    .form__submit:active {
+      transform: translateY(0);
+    }
+
+    .form__submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @media (max-width: 1023px) {
+      .contact__grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-7);
+      }
+    }
+
+    /* ============================================
+       FOOTER
+    ============================================ */
+    .footer {
+      background: var(--c-inverted);
+      padding: var(--space-6) 0;
+    }
+
+    .footer__inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--grid-padding);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer__copy {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .footer__social {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .footer__social-link {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.35);
+      transition: color 250ms var(--ease-out);
+    }
+
+    .footer__social-link:hover {
+      color: var(--c-accent);
+    }
+
+    .footer__back-top {
+      position: fixed;
+      bottom: var(--space-4);
+      right: var(--grid-padding);
+      width: 44px;
+      height: 44px;
+      background: var(--c-accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out), background 250ms;
+      z-index: 100;
+    }
+
+    .footer__back-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .footer__back-top:hover {
+      background: var(--c-accent-deep);
+    }
+
+    @media (max-width: 767px) {
+      .footer__inner {
+        flex-direction: column;
+        gap: var(--space-3);
+        text-align: center;
+      }
+      .footer__back-top {
+        right: var(--space-3);
+        bottom: var(--space-3);
+      }
+    }
+
+    /* ============================================
+       LOADING OVERLAY
+    ============================================ */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: var(--c-inverted);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 600ms var(--ease-out), visibility 600ms;
+    }
+
+    .loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader__text {
+      font-family: var(--f-primary);
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: 0.2em;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .loader__text span {
+      display: inline-block;
+      animation: loaderReveal 600ms var(--ease-out) both;
+    }
+
+    .loader__text span:nth-child(1) { animation-delay: 0ms; }
+    .loader__text span:nth-child(2) { animation-delay: 80ms; }
+    .loader__text span:nth-child(3) { animation-delay: 160ms; }
+    .loader__text span:nth-child(4) { animation-delay: 240ms; }
+
+    @keyframes loaderReveal {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================
+       MISC UTILITIES
+    ============================================ */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--c-divider);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+
+    /* Focus styles */
+    :focus-visible {
+      outline: 2px solid var(--c-accent);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__text">
+      <span>H</span><span>A</span><span>U</span><span>S</span>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header" id="header" role="banner">
+    <div class="container">
+      <div class="header__inner">
+        <a href="#" class="header__logo" aria-label="HAUS — Architectural Studio">HAUS</a>
+        <nav class="header__nav" id="nav" role="navigation" aria-label="Primary navigation">
+          <a href="#works" class="header__nav-link" data-section="works">Work</a>
+          <a href="#philosophy" class="header__nav-link" data-section="philosophy">Studio</a>
+          <a href="#contact" class="header__nav-link" data-section="contact">Contact</a>
+        </nav>
+        <button class="header__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero" aria-label="Featured projects">
+    <div class="hero__track" id="heroTrack">
+      <!-- Slide 1 -->
+      <div class="hero__slide" data-index="0" role="img" aria-label="Volta Residence — Minimalist interior with warm wood and concrete">
+        <img
+          class="hero__slide-bg"
+          src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=80&auto=format&fit=crop"
+          alt="Volta Residence — Minimalist interior"
+          loading="eager"
+        >
+        <div class="hero__slide-overlay"></div>
+        <div class="hero__slide-content">
+          <h2 class="hero__slide-title">Volta<br>Residence</h2>
+          <div class="hero__slide-meta">
+            <span class="t-label">Residential</span>
+            <span class="hero__slide-meta-name">Zürich, Switzerland — 2023</span>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="hero__slide" data-index="1" role="img" aria-label="Meridian Office — Contemporary workspace design">
+        <img
+          class="hero__slide-bg"
+          src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80&auto=format&fit=crop"
+          alt="Meridian Office — Contemporary workspace"
+          loading="eager"
+        >
+        <div class="hero__slide-overlay"></div>
+        <div class="hero__slide-content">
+          <h2 class="hero__slide-title">Meridian<br>Office</h2>
+          <div class="hero__slide-meta">
+            <span class="t-label">Commercial</span>
+            <span class="hero__slide-meta-name">Basel, Switzerland — 2022</span>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="hero__slide" data-index="2" role="img" aria-label="Aurelia Pavilion — Light-filled cultural space">
+        <img
+          class="hero__slide-bg"
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=80&auto=format&fit=crop"
+          alt="Aurelia Pavilion — Cultural space"
+          loading="eager"
+        >
+        <div class="hero__slide-overlay"></div>
+        <div class="hero__slide-content">
+          <h2 class="hero__slide-title">Aurelia<br>Pavilion</h2>
+          <div class="hero__slide-meta">
+            <span class="t-label">Cultural</span>
+            <span class="hero__slide-meta-name">Geneva, Switzerland — 2023</span>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 4 -->
+      <div class="hero__slide" data-index="3" role="img" aria-label="Norden House — Nordic residential architecture">
+        <img
+          class="hero__slide-bg"
+          src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&q=80&auto=format&fit=crop"
+          alt="Norden House — Nordic residential architecture"
+          loading="eager"
+        >
+        <div class="hero__slide-overlay"></div>
+        <div class="hero__slide-content">
+          <h2 class="hero__slide-title">Norden<br>House</h2>
+          <div class="hero__slide-meta">
+            <span class="t-label">Residential</span>
+            <span class="hero__slide-meta-name">Oslo, Norway — 2024</span>
+          </div>
+        </div>
+      </div>
+      <!-- Slide 5 -->
+      <div class="hero__slide" data-index="4" role="img" aria-label="Terra Hotel — Boutique accommodation design">
+        <img
+          class="hero__slide-bg"
+          src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=80&auto=format&fit=crop"
+          alt="Terra Hotel — Boutique accommodation"
+          loading="eager"
+        >
+        <div class="hero__slide-overlay"></div>
+        <div class="hero__slide-content">
+          <h2 class="hero__slide-title">Terra<br>Hotel</h2>
+          <div class="hero__slide-meta">
+            <span class="t-label">Hospitality</span>
+            <span class="hero__slide-meta-name">Lucerne, Switzerland — 2024</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Large background title -->
+    <div class="hero__intro" aria-hidden="true">
+      <div class="hero__intro-label">Est. 2009 — Zürich</div>
+      <div class="hero__intro-title">HAUS</div>
+    </div>
+
+    <!-- Slide indicators -->
+    <div class="hero__indicators" role="tablist" aria-label="Slide navigation">
+      <button class="hero__indicator active" data-slide="0" role="tab" aria-selected="true" aria-label="Slide 1 — Volta Residence"></button>
+      <button class="hero__indicator" data-slide="1" role="tab" aria-selected="false" aria-label="Slide 2 — Meridian Office"></button>
+      <button class="hero__indicator" data-slide="2" role="tab" aria-selected="false" aria-label="Slide 3 — Aurelia Pavilion"></button>
+      <button class="hero__indicator" data-slide="3" role="tab" aria-selected="false" aria-label="Slide 4 — Norden House"></button>
+      <button class="hero__indicator" data-slide="4" role="tab" aria-selected="false" aria-label="Slide 5 — Terra Hotel"></button>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="hero__bottom" aria-hidden="true">
+      <span class="hero__year">2009 — 2024</span>
+      <span class="hero__scroll-hint">
+        <span class="hero__scroll-hint-line"></span>
+        Scroll
+      </span>
+    </div>
+
+    <!-- Progress -->
+    <div class="hero__progress" aria-hidden="true">
+      <div class="hero__progress-fill" id="heroProgress"></div>
+    </div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto" id="manifesto">
+    <div class="manifesto__inner">
+      <p class="manifesto__label t-label reveal" style="transition-delay: 0ms;">— Studio Manifesto</p>
+      <div class="manifesto__accent-line reveal" style="transition-delay: 80ms;"></div>
+      <h2 class="manifesto__text reveal" style="transition-delay: 160ms;">
+        We build for <em>permanence</em>.<br>
+        Not the permanence of stone —<br>
+        of <em>idea</em>.
+      </h2>
+      <div class="manifesto__sub">
+        <p class="manifesto__sub-text reveal" style="transition-delay: 240ms;">
+          Every project begins with a single question: what endures? We strip away the decorative until only the essential remains — spaces that breathe with their inhabitants across decades.
+        </p>
+        <p class="manifesto__sub-text reveal" style="transition-delay: 320ms;">
+          Our practice spans residential, cultural, and commercial architecture across 12 countries. Each project is a response to its site, climate, and human need — never a stylistic statement.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELECTED WORKS -->
+  <section class="works" id="works">
+    <div class="container">
+      <div class="works__header">
+        <h2 class="works__title reveal">Selected<br>Works</h2>
+        <span class="works__count t-label reveal" style="transition-delay: 80ms;">12 Projects</span>
+      </div>
+      <div class="works__grid">
+        <article class="works__item reveal" style="transition-delay: 0ms;">
+          <img
+            class="works__item-img"
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80&auto=format&fit=crop"
+            alt="Volta Residence — Zürich"
+            loading="lazy"
+          >
+          <div class="works__item-border"></div>
+          <span class="works__item-num">01</span>
+          <div class="works__item-info">
+            <span class="works__item-cat">Residential — Zürich</span>
+            <h3 class="works__item-name">Volta Residence</h3>
+          </div>
+        </article>
+        <article class="works__item reveal" style="transition-delay: 120ms;">
+          <img
+            class="works__item-img"
+            src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&q=80&auto=format&fit=crop"
+            alt="Meridian Office — Basel"
+            loading="lazy"
+          >
+          <div class="works__item-border"></div>
+          <span class="works__item-num">02</span>
+          <div class="works__item-info">
+            <span class="works__item-cat">Commercial — Basel</span>
+            <h3 class="works__item-name">Meridian Office</h3>
+          </div>
+        </article>
+        <article class="works__item reveal" style="transition-delay: 240ms;">
+          <img
+            class="works__item-img"
+            src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1920&q=80&auto=format&fit=crop"
+            alt="Aurelia Pavilion — Geneva"
+            loading="lazy"
+          >
+          <div class="works__item-border"></div>
+          <span class="works__item-num">03</span>
+          <div class="works__item-info">
+            <span class="works__item-cat">Cultural — Geneva</span>
+            <h3 class="works__item-name">Aurelia Pavilion</h3>
+          </div>
+        </article>
+        <article class="works__item reveal" style="transition-delay: 80ms;">
+          <img
+            class="works__item-img"
+            src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=1200&q=80&auto=format&fit=crop"
+            alt="Norden House — Oslo"
+            loading="lazy"
+          >
+          <div class="works__item-border"></div>
+          <span class="works__item-num">04</span>
+          <div class="works__item-info">
+            <span class="works__item-cat">Residential — Oslo</span>
+            <h3 class="works__item-name">Norden House</h3>
+          </div>
+        </article>
+        <article class="works__item reveal" style="transition-delay: 200ms;">
+          <img
+            class="works__item-img"
+            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=1200&q=80&auto=format&fit=crop"
+            alt="Terra Hotel — Lucerne"
+            loading="lazy"
+          >
+          <div class="works__item-border"></div>
+          <span class="works__item-num">05</span>
+          <div class="works__item-info">
+            <span class="works__item-cat">Hospitality — Lucerne</span>
+            <h3 class="works__item-name">Terra Hotel</h3>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats" id="stats">
+    <div class="stats__inner">
+      <div class="stats__grid">
+        <div class="stats__item reveal" style="transition-delay: 0ms;">
+          <div class="stats__number" data-target="142">0</div>
+          <div class="stats__label">Projects Completed</div>
+        </div>
+        <div class="stats__item reveal" style="transition-delay: 80ms;">
+          <div class="stats__number" data-target="12">0</div>
+          <div class="stats__label">Countries</div>
+        </div>
+        <div class="stats__item reveal" style="transition-delay: 160ms;">
+          <div class="stats__number" data-target="15">0</div>
+          <div class="stats__label">Years of Practice</div>
+        </div>
+        <div class="stats__item reveal" style="transition-delay: 240ms;">
+          <div class="stats__number" data-target="28">0</div>
+          <div class="stats__label">Design Awards</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY -->
+  <section class="philosophy" id="philosophy">
+    <div class="container">
+      <p class="philosophy__label t-label reveal">— Design Philosophy</p>
+      <h2 class="philosophy__heading reveal" style="transition-delay: 80ms;">
+        Three principles guide every space we design.
+      </h2>
+      <div class="philosophy__cols">
+        <div class="reveal" style="transition-delay: 0ms;">
+          <div class="philosophy__col-num t-label">01</div>
+          <h3 class="philosophy__col-title">Material Honesty</h3>
+          <p class="philosophy__col-text">Concrete looks like concrete. Wood ages like wood. We never disguise a material's nature — we amplify it. Our detailing celebrates the intrinsic qualities of each substance.</p>
+        </div>
+        <div class="reveal" style="transition-delay: 120ms;">
+          <div class="philosophy__col-num t-label">02</div>
+          <h3 class="philosophy__col-title">Spatial Economy</h3>
+          <p class="philosophy__col-text">Every square metre must justify its existence. We design spaces that serve multiple functions across different times of day, season, and the shifting needs of their inhabitants.</p>
+        </div>
+        <div class="reveal" style="transition-delay: 240ms;">
+          <div class="philosophy__col-num t-label">03</div>
+          <h3 class="philosophy__col-title">Contextual Response</h3>
+          <p class="philosophy__col-text">No site is neutral. Climate, topography, history, culture — these are not constraints but the raw material of architecture. We listen before we draw.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="team" id="team">
+    <div class="container">
+      <div class="team__header">
+        <h2 class="team__title reveal">The Studio</h2>
+        <span class="t-label reveal" style="transition-delay: 80ms;">6 Architects</span>
+      </div>
+      <div class="team__grid">
+        <div class="team__member reveal" style="transition-delay: 0ms;">
+          <div class="team__member-img-wrap">
+            <img
+              class="team__member-img"
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&auto=format&fit=crop&crop=face"
+              alt="Thomas Keller — Founding Partner"
+              loading="lazy"
+            >
+          </div>
+          <div class="team__member-role">Founding Partner</div>
+          <div class="team__member-name">Thomas Keller</div>
+        </div>
+        <div class="team__member reveal" style="transition-delay: 80ms;">
+          <div class="team__member-img-wrap">
+            <img
+              class="team__member-img"
+              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80&auto=format&fit=crop&crop=face"
+              alt="Lena Fischer — Design Director"
+              loading="lazy"
+            >
+          </div>
+          <div class="team__member-role">Design Director</div>
+          <div class="team__member-name">Lena Fischer</div>
+        </div>
+        <div class="team__member reveal" style="transition-delay: 160ms;">
+          <div class="team__member-img-wrap">
+            <img
+              class="team__member-img"
+              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80&auto=format&fit=crop&crop=face"
+              alt="Marco Bernasconi — Technical Lead"
+              loading="lazy"
+            >
+          </div>
+          <div class="team__member-role">Technical Lead</div>
+          <div class="team__member-name">Marco Bernasconi</div>
+        </div>
+        <div class="team__member reveal" style="transition-delay: 240ms;">
+          <div class="team__member-img-wrap">
+            <img
+              class="team__member-img"
+              src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80&auto=format&fit=crop&crop=face"
+              alt="Sofia Meier — Project Architect"
+              loading="lazy"
+            >
+          </div>
+          <div class="team__member-role">Project Architect</div>
+          <div class="team__member-name">Sofia Meier</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AWARDS MARQUEE -->
+  <section class="awards" aria-label="Awards and recognition" aria-hidden="true">
+    <div class="awards__track" id="awardsTrack">
+      <!-- Duplicated for seamless loop -->
+      <div class="awards__track-inner" style="display:flex;gap:80px;flex-shrink:0;">
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Swiss Design Prize 2023</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Archdaily Building of the Year</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Dezeen Awards Finalist</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">RIBA International Award</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Wallpaper* Design Award</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Aga Khan Award Shortlist</span></div>
+      </div>
+      <div class="awards__track-inner" style="display:flex;gap:80px;flex-shrink:0;" aria-hidden="true">
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Swiss Design Prize 2023</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Archdaily Building of the Year</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Dezeen Awards Finalist</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">RIBA International Award</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Wallpaper* Design Award</span></div>
+        <div class="awards__item"><span class="awards__dot"></span><span class="awards__text">Aga Khan Award Shortlist</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="contact__grid">
+        <div class="contact__left">
+          <h2 class="contact__heading reveal">Let's build something <em>lasting</em>.</h2>
+          <p class="contact__desc reveal" style="transition-delay: 80ms;">
+            We take on a limited number of projects each year to ensure every commission receives our full attention. If your vision aligns with our practice, we'd like to hear from you.
+          </p>
+          <div class="contact__info reveal" style="transition-delay: 160ms;">
+            <div class="contact__info-item">
+              <span class="contact__info-label">Address</span>
+              <span class="contact__info-value">Rämistrasse 5, 8001 Zürich</span>
+            </div>
+            <div class="contact__info-item">
+              <span class="contact__info-label">Email</span>
+              <span class="contact__info-value">studio@haus-arch.ch</span>
+            </div>
+            <div class="contact__info-item">
+              <span class="contact__info-label">Phone</span>
+              <span class="contact__info-value">+41 44 212 00 00</span>
+            </div>
+          </div>
+        </div>
+        <form class="contact__form reveal" id="contactForm" style="transition-delay: 200ms;" novalidate>
+          <div class="form__group">
+            <label class="form__label" for="name">Your Name</label>
+            <input class="form__input" type="text" id="name" name="name" autocomplete="name" required placeholder="Anna Brunner">
+            <span class="form__error" id="nameError" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="email">Email Address</label>
+            <input class="form__input" type="email" id="email" name="email" autocomplete="email" required placeholder="anna@studio.ch">
+            <span class="form__error" id="emailError" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="projectType">Project Type</label>
+            <select class="form__select" id="projectType" name="projectType" required>
+              <option value="" disabled selected>Select a category</option>
+              <option value="residential">Residential</option>
+              <option value="commercial">Commercial</option>
+              <option value="cultural">Cultural / Public</option>
+              <option value="hospitality">Hospitality</option>
+              <option value="urban">Urban Planning</option>
+              <option value="other">Other</option>
+            </select>
+            <span class="form__error" id="projectTypeError" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="message">Tell us about your project</label>
+            <textarea class="form__textarea" id="message" name="message" rows="5" required placeholder="Describe your vision, timeline, and location…"></textarea>
+            <span class="form__error" id="messageError" role="alert" aria-live="polite"></span>
+          </div>
+          <button type="submit" class="form__submit" id="submitBtn">
+            <span id="submitText">Send Inquiry</span>
+            <svg id="submitSpinner" width="14" height="14" viewBox="0 0 14 14" style="display:none;animation:spin 1s linear infinite;">
+              <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="20" stroke-dashoffset="5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer__inner">
+      <span class="footer__copy">© 2024 HAUS Architektur AG — Zürich, Switzerland</span>
+      <div class="footer__social" aria-label="Social media links">
+        <a href="#" class="footer__social-link" aria-label="Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+          </svg>
+        </a>
+        <a href="#" class="footer__social-link" aria-label="LinkedIn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="2"/>
+            <path d="M8 11v5M8 8v.01M12 16v-5M12 11a3 3 0 016 0v5"/>
+          </svg>
+        </a>
+        <a href="#" class="footer__social-link" aria-label="Pinterest">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.236 2.636 7.855 6.356 9.312-.088-.791-.167-2.005.035-2.868.181-.78 1.172-4.97 1.172-4.97s-.299-.598-.299-1.482c0-1.388.806-2.425 1.81-2.425.852 0 1.265.64 1.265 1.408 0 .858-.546 2.14-.828 3.33-.236.995.499 1.806 1.476 1.806 1.772 0 3.137-1.868 3.137-4.562 0-2.386-1.716-4.054-4.163-4.054-2.836 0-4.5 2.127-4.5 4.326 0 .856.33 1.773.741 2.274a.3.3 0 01.069.286c-.075.313-.243.995-.276 1.134-.044.183-.146.222-.337.134-1.249-.581-2.03-2.407-2.03-3.874 0-3.154 2.292-6.052 6.608-6.052 3.469 0 6.165 2.473 6.165 5.776 0 3.447-2.173 6.22-5.19 6.22-1.013 0-1.966-.527-2.292-1.148l-.623 2.378c-.226.869-.835 1.958-1.244 2.621.937.29 1.931.446 2.962.446 5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BACK TO TOP -->
+  <button class="footer__back-top" id="backTop" aria-label="Back to top">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M8 12V4M4 8l4-4 4 4"/>
+    </svg>
+  </button>
+
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    // ============================================
+    // LOADER
+    // ============================================
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+      }, 1000);
+    });
+
+    // ============================================
+    // HEADER SCROLL
+    // ============================================
+    const header = document.getElementById('header');
+    let lastScroll = 0;
+
+    window.addEventListener('scroll', () => {
+      const current = window.scrollY;
+      if (current > 80) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+      lastScroll = current;
+    }, { passive: true });
+
+    // ============================================
+    // MOBILE NAV
+    // ============================================
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    const navLinks = nav.querySelectorAll('.header__nav-link');
+
+    hamburger.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        nav.classList.remove('open');
+        hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // ============================================
+    // HERO SLIDER
+    // ============================================
+    const track = document.getElementById('heroTrack');
+    const slides = document.querySelectorAll('.hero__slide');
+    const indicators = document.querySelectorAll('.hero__indicator');
+    const progressFill = document.getElementById('heroProgress');
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+    let autoSlideInterval;
+    let isHoveringHero = false;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function goToSlide(index) {
+      if (index < 0) index = totalSlides - 1;
+      if (index >= totalSlides) index = 0;
+      currentSlide = index;
+
+      track.style.transform = `translateX(-${currentSlide * 100}vw)`;
+      progressFill.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+
+      indicators.forEach((ind, i) => {
+        ind.classList.toggle('active', i === currentSlide);
+        ind.setAttribute('aria-selected', i === currentSlide);
+      });
+    }
+
+    function nextSlide() {
+      goToSlide((currentSlide + 1) % totalSlides);
+    }
+
+    function startAutoSlide() {
+      autoSlideInterval = setInterval(() => {
+        if (!isHoveringHero) nextSlide();
+      }, 6000);
+    }
+
+    function stopAutoSlide() {
+      clearInterval(autoSlideInterval);
+    }
+
+    // Indicator clicks
+    indicators.forEach((ind) => {
+      ind.addEventListener('click', () => {
+        stopAutoSlide();
+        goToSlide(parseInt(ind.dataset.slide));
+        startAutoSlide();
+      });
+    });
+
+    // Mouse wheel → next slide (desktop only)
+    const hero = document.getElementById('hero');
+    let wheelTimeout;
+
+    hero.addEventListener('wheel', (e) => {
+      if (window.innerWidth < 768) return;
+      e.preventDefault();
+      clearTimeout(wheelTimeout);
+      wheelTimeout = setTimeout(() => {
+        if (e.deltaY > 30) nextSlide();
+        else if (e.deltaY < -30) goToSlide(currentSlide - 1);
+      }, 50);
+    }, { passive: false });
+
+    // Touch swipe
+    hero.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    hero.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        stopAutoSlide();
+        if (diff > 0) nextSlide();
+        else goToSlide(currentSlide - 1);
+        startAutoSlide();
+      }
+    }, { passive: true });
+
+    hero.addEventListener('mouseenter', () => { isHoveringHero = true; });
+    hero.addEventListener('mouseleave', () => { isHoveringHero = false; });
+
+    startAutoSlide();
+
+    // ============================================
+    // SCROLL REVEAL — IntersectionObserver
+    // ============================================
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    // ============================================
+    // STAT COUNTER ANIMATION
+    // ============================================
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.target);
+          const duration = 1400;
+          const start = performance.now();
+
+          function animate(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // ease-out
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(eased * target);
+            if (progress < 1) requestAnimationFrame(animate);
+          }
+
+          requestAnimationFrame(animate);
+          counterObserver.unobserve(el);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.stats__number[data-target]').forEach(el => {
+      counterObserver.observe(el);
+    });
+
+    // ============================================
+    // SCROLL SPY — NAV
+    // ============================================
+    const sections = document.querySelectorAll('section[id]');
+    const navLinksAll = document.querySelectorAll('.header__nav-link');
+
+    const spyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinksAll.forEach(link => {
+            const isActive = link.dataset.section === id;
+            link.classList.toggle('active', isActive);
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+
+    sections.forEach(section => {
+      if (section.id) spyObserver.observe(section);
+    });
+
+    // ============================================
+    // BACK TO TOP
+    // ============================================
+    const backTop = document.getElementById('backTop');
+
+    window.addEventListener('scroll', () => {
+      backTop.classList.toggle('visible', window.scrollY > 600);
+    }, { passive: true });
+
+    backTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ============================================
+    // CONTACT FORM VALIDATION
+    // ============================================
+    const form = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+
+    function showError(fieldId, message) {
+      const input = document.getElementById(fieldId);
+      const errorEl = document.getElementById(fieldId + 'Error');
+      input.classList.add('error');
+      if (errorEl) errorEl.textContent = message;
+    }
+
+    function clearError(fieldId) {
+      const input = document.getElementById(fieldId);
+      const errorEl = document.getElementById(fieldId + 'Error');
+      input.classList.remove('error');
+      if (errorEl) errorEl.textContent = '';
+    }
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validateField(field) {
+      const value = field.value.trim();
+      clearError(field.id);
+
+      if (field.required && !value) {
+        showError(field.id, 'This field is required');
+        return false;
+      }
+
+      if (field.type === 'email' && value && !validateEmail(value)) {
+        showError(field.id, 'Please enter a valid email address');
+        return false;
+      }
+
+      if (field.id === 'projectType' && !value) {
+        showError(field.id, 'Please select a project type');
+        return false;
+      }
+
+      return true;
+    }
+
+    // Blur validation
+    form.querySelectorAll('.form__input, .form__select, .form__textarea').forEach(field => {
+      field.addEventListener('blur', () => validateField(field));
+      field.addEventListener('input', () => {
+        if (field.classList.contains('error')) validateField(field);
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const fields = ['name', 'email', 'projectType', 'message'];
+      let valid = true;
+
+      fields.forEach(id => {
+        if (!validateField(document.getElementById(id))) {
+          valid = false;
+        }
+      });
+
+      if (!valid) {
+        // Shake form
+        form.style.animation = 'none';
+        form.offsetHeight; // reflow
+        form.style.animation = 'shake 400ms ease-out';
+        return;
+      }
+
+      // Simulate sending
+      submitBtn.disabled = true;
+      submitText.textContent = 'Sending…';
+      submitSpinner.style.display = 'inline';
+
+      setTimeout(() => {
+        submitText.textContent = 'Message Sent ✓';
+        submitSpinner.style.display = 'none';
+        submitBtn.style.background = '#2d8a5e';
+        form.reset();
+
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          submitBtn.style.background = '';
+          submitText.textContent = 'Send Inquiry';
+        }, 3000);
+      }, 1800);
+    });
+
+    // Shake keyframe
+    const shakeStyle = document.createElement('style');
+    shakeStyle.textContent = `
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+      }
+    `;
+    document.head.appendChild(shakeStyle);
+
+    // ============================================
+    // SMOOTH ANCHOR SCROLL WITH OFFSET
+    // ============================================
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          const offset = 72; // header height
+          const top = target.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
